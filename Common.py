@@ -76,20 +76,26 @@ class System(MonitorCallbackWrapped):
         self.vschedule.submit(campaign)
 
     def update_virtual_queue(self,new_vqueue):
-        self.log('recieving an incoming queue from the virtual schedule.: %s'%new_vqueue )
-        self.log('previous system queue: %s'%self.vqueue)
+        #self.log('recieving an incoming queue from the virtual schedule.: %s'%new_vqueue )
+        #self.log('previous system queue: %s'%self.vqueue)
         q=[]
         for c in self.vqueue:
             if c not in new_vqueue:
                 q.append(c)
         q.extend(new_vqueue)
+        self.log('debug1')
+        new=False
+        if len(self.vqueue)==len(q):
+            for i in range(0,len(q)):
+                if not q[i]==self.vqueue[i]:
+                    new=True
+        else:
+            new=True
         self.vqueue=q
-        self.log('updated system queue to: %s'%self.vqueue)
         self.run_monitor
-        self.log('calling local algo with %s cores'%self.cores)
-        orders=self.localalgo(self.env,self.hardware.get_status(),self.vqueue,self.cores,self.sorter,self.logfunc)
-        self.log('ran local algo on campaign queue, got orders:%s'%orders)
-        self.hardware.submit(orders)
+        if new:
+            orders=self.localalgo(self.env,self.hardware.get_status(),self.vqueue,self.cores,self.sorter,self.logfunc)
+            self.hardware.submit(orders)
 
 class User(MonitorCallbackWrapped):
     def __init__(self,env,uid,campaign_deque,system,logfunc):

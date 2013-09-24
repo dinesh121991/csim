@@ -167,8 +167,7 @@ def terminator():
     log('TERMINATOR : waiting for all users to finish.')
     yield simpy.util.all_of([u.over for u in users])
     system.stop()
-    if arguments['--verbose'] == True:
-        cronjob_progression.stop()
+    cronjob_progression.stop()
     log('TERMINATOR : all users finished.')
 env.start(terminator())
 
