@@ -124,13 +124,13 @@ class Hardware_slurm:
         self.last_slurmtracking_update=self.env.now
 
     def add_job_to_slurmtracking(self,job):
-        print("addjob call on"+str(job))
+        #print("addjob call on"+str(job))
         self.log('adding job to slurmtracking')
         self.update_slurmtracking()
         self.trackedjobs.append(job)
 
     def end_job_in_slurmtracking(self,job):
-        print("endjob call on"+str(job))
+        #print("endjob call on"+str(job))
         self.log('ending job in slurmtracking')
         self.update_slurmtracking()
         if job in self.trackedjobs:

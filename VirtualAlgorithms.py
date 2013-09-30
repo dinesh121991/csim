@@ -136,23 +136,24 @@ class VirtualSchedule_slurm(VirtualSchedule):
 
     @submitwrap
     def submit(self,campaign):
-        print("Campaign_Arrival: update virt queue")
+        #print("Campaign_Arrival: update virt queue")
         self.campaignlist.append(campaign)
         self.campaignlist=sorted(self.campaignlist,key=lambda c:self.hardware.get_fairshare_factor(c.uid))
         self.simulator.update_virtual_queue(self.campaignlist)
 
     def update_queue(self,job):
         temp=sorted(self.campaignlist,key=lambda c:self.hardware.get_fairshare_factor(c.uid))
-        print(self.campaignlist)
+        #print(self.campaignlist)
         if not temp==self.campaignlist:
             self.simulator.update_virtual_queue(temp)
-            print("Job Termination: update virt queue")
-            for c in temp:
-                pass
+            #print("Job Termination: update virt queue")
+            #for c in temp:
+                #pass
                 #print("user %s campaign %s factor %s" %(c.uid,c,self.hardware.get_fairshare_factor(c.uid)))
 
-        else:
-            print("Job Termination:NOT update virt queue")
+        #else:
+            #pass
+            #print("Job Termination:NOT update virt queue")
 
                 
 
