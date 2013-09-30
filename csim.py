@@ -150,9 +150,11 @@ del yusers
         #for job in campaign.jobs:
             #print(job)
 
+f= open(arguments['<output>'],'w+')
+
 system.start()
 for user in users:
-    user.start()
+    user.start(f)
 
 
 if arguments['--verbose'] == True:
@@ -173,10 +175,6 @@ env.start(terminator())
 
 simulate(env)
 
-with open(arguments['<output>'],'w+') as f:
-    for user in users:
-        for campaign in user.old_campaigns:
-            for job in campaign.jobs:
-                f.write(job.swfstring()+'\n')
+f.close()
 
 print('-------------SUCCESS----------------')

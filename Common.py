@@ -107,12 +107,15 @@ class User(MonitorCallbackWrapped):
         self.over=env.event()
         MonitorCallbackWrapped.__init__(self,logfunc,'USER %s '%self.uid)
 
-    def start(self):
+    def start(self,f):
+        self.f=f
         self.env.start(self.run())
 
     def run(self):
         while not len(self.campaign_deque)==0:
             campaign=self.campaign_deque.popleft()
+            for j in campaign.jobs:
+                j.setfile(self.f)
             if campaign.thinktime==0:
                 self.log('no thinktime' )
             else:
@@ -168,6 +171,11 @@ class Job(MonitorCallbackWrapped):
         self.swf_subtime=0
         self.started=False
         MonitorCallbackWrapped.__init__(self,logfunc,'')
+        
+
+
+    def setfile(self,f):
+        self.f=f
 
     def get_remaining_walltime(self):
         if self.started and not self.over.triggered:
@@ -194,6 +202,7 @@ class Job(MonitorCallbackWrapped):
         self.log('E %s'%self)
         self.swf_end=self.env.now
         self.over.succeed()
+        self.f.write(self.swfstring()+'\n')
         for f in self.callback_after:
             f(self)
 
