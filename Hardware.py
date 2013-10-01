@@ -103,6 +103,7 @@ class Hardware_slurm:
                             self.orders[j]=self.orders[j]-wait_time
                         for j in self.orders.keys():
                             if self.orders[j]==0:
+                                j.clean_callbacks()
                                 j.add_callbacks_before(self.add_job_to_slurmtracking)
                                 j.add_callbacks_after(self.end_job_in_slurmtracking)
                                 j.add_callbacks_after(self.vschedule.update_queue)
@@ -131,7 +132,7 @@ class Hardware_slurm:
 
     def end_job_in_slurmtracking(self,job):
         #print("endjob call on"+str(job))
-        self.log('ending job in slurmtracking')
+        self.log('ending job in slurmtracking, called from job %s' %job)
         self.update_slurmtracking()
         if job in self.trackedjobs:
             self.trackedjobs.remove(job)
