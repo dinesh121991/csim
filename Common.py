@@ -26,6 +26,11 @@ class MonitorCallbackWrapped:
         self.callback_after=[]
         self.monitored=False
 
+
+    def clean_callbacks(self):
+        self.callback_before=[]
+        self.callback_after=[]
+
     def add_callbacks_before(self,callbacks):
         try:
             self.callback_before.extend(callbacks)
@@ -205,6 +210,7 @@ class Job(MonitorCallbackWrapped):
         self.f.write(self.swfstring()+'\n')
         for f in self.callback_after:
             f(self)
+            self.log("length of callback after queue: %s" %len(self.callback_after))
 
     def __repr__(self):
         return('{user %s, id %s, walltime %s, cores %s}'
