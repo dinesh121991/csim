@@ -1,0 +1,37 @@
+#!/usr/bin/env Rscript
+#
+
+#Location of the R files folder (our "library")
+library.folder="./R"
+
+#Here, add the individual files to load from the R files folder.
+to.source=c("ENGINEERING_DEBT.R")
+
+########BEGINNING OF PATH AND SOURCING MADNESS, Do not alter or you will spend 8 hours on stackoverflow trying to solve your issue.
+initial.options <- commandArgs(trailingOnly = FALSE)
+file.arg.name <- "--file="
+script.name <- sub(file.arg.name, "", initial.options[grep(file.arg.name, initial.options)])
+script.basename <- dirname(script.name)
+oldwd=getwd()
+setwd(script.basename)
+setwd(library.folder)
+for (filename in to.source) {
+source(filename)
+}
+setwd(oldwd)
+
+##Beginning of your script. you are in the folder where you called the script from and you can access the arguments the user passed with commandArgs(TRUE)[x] with x starting at 1.
+
+#Output will be as pdf, do filename stuff here.
+
+widthratio=commandArgs(TRUE)[5]
+swf_filename=commandArgs(TRUE)[1]
+swf_filename2=commandArgs(TRUE)[2]
+association_filename=commandArgs(TRUE)[3]
+
+pdf(file=commandArgs(TRUE)[4],width=7*as.numeric(widthratio),height=7)
+
+#the actual script.
+data=swf2df(swf_filename)
+data2=swf2df(swf_filename2)
+df2ed(data,data2,association_filename)

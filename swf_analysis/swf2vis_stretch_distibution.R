@@ -1,0 +1,144 @@
+#!/usr/bin/Rscript
+
+
+################WORKING DIRECTORY MAGIC##########
+##################DO NOT ALTER###################
+initial.options <- commandArgs(trailingOnly = FALSE)
+file.arg.name <- "--file="
+script.name <- sub(file.arg.name, "", initial.options[grep(file.arg.name, initial.options)])
+script.basename <- dirname(script.name)
+execution_wd=getwd()
+setwd(script.basename)
+base_script_wd=getwd()
+###################END BLOCK#####################
+
+##############COMMON REQUIREMENTS################
+##################DO NOT ALTER###################
+#Parser file with all the parser types.
+source('Rscript/parser.R')
+###################END BLOCK#####################
+
+
+##############SCRIPT PARAMETERS##################
+#############MODIFY AS REQUIRED##################
+
+#Path file for setting up the location of your R files.
+#you can alternatively set rfold='/path/to/your/files', but its less modular.
+source('Rscript/path.R')
+
+#description and epilog for the console help output.
+#e.g. description="This scripts does this and that."
+#e.g. epilog="use with caution. refer to www.site.com .."
+description='Histogram of all the stretches from the campaign.'
+epilog='You can enter multiple logs in order to compare them on a single graph.'
+
+#External parser function: for usual options.
+#e.g. parser=parser_swf(description,epilog)
+parser=parser_swf_with_cores(description,epilog)
+
+
+#additional argparse entries for this particular script.
+#e.g. parser$add_argument('-s','--sum', dest='accumulate', action='store_const', const=sum, default=max,help='sum the integers (default: find the max)')
+
+#files you want to source from the rfold folder for this Rscript
+#e.g. c('common.R','histogram.R')
+userfiles=c('common.R','campaign_detection.R','campaign_scheduling_metrics.R','campaign_analysis.R','utilization.R')
+
+###################END BLOCK#####################
+
+
+###SOURCING, CONTEXT CLEANING, ARG RETRIEVE######
+##################DO NOT ALTER###################
+#code insertion.
+rm(list=setdiff(ls(),c("parser","rfold","userfiles","execution_wd","base_script_wd")))
+args=parser$parse_args()
+#Verbosity management.
+source('Rscript/verbosity.R')
+verb<-verbosity_function_maker(args$verbosity)
+verb(args,"Parameters to the script")
+
+setwd(rfold)
+rfold_wd=getwd()
+for (filename in userfiles) {
+	source(filename)
+}
+
+
+setwd(base_script_wd)
+rm(parser,rfold,userfiles)
+###################END BLOCK#####################
+
+
+#####################OUTPUT_MANAGEMENT###########
+################MODIFY IF NEEDED####################
+source('Rscript/output_management.R')
+options_vector=set_output(args$device,args$output,args$ratio,execution_wd)
+###################END BLOCK#####################
+
+
+#############BEGIN YOUR RSCRIPT HERE.############
+#here is your working directory :)
+setwd(execution_wd)
+#You have access to:
+#set_output(device='pdf',filename='tmp.pdf',ratio=1)
+#use it if you really want to change the output type on your way.
+#pause_output(pause=TRUE) for x11
+#use it to pause for output.
+#args for retrieving your arguments.
+
+
+#type stuff here.
+do_one_file <- function( dfargs ) {
+	verb("entered do_one_file")
+	verb(dfargs,"the args:")
+	swf_filename=dfargs[1]
+	cores=dfargs[2]
+
+	df=swf_read(swf_filename)
+	C<-swf_campaign_detection(df)
+	if(cores==0){
+		cores=max_cores(df)
+	}
+
+	C<-add_stretch_column(C,cores)
+	return(C)
+}
+
+if ( is.null(args$cores) ) {
+	cores=rep(0,length(args$swf_filenames))
+	verb(cores,d="Calculating all cores with utilization()")
+}
+
+arguments=(cbind(args$swf_filenames,cores))
+data_ready_to_plot=apply(arguments,1,do_one_file)
+
+verb(data_ready_to_plot,d="Data ready to plot:")
+
+if (length(args$labels)==1){
+	if (args$labels=='') {
+		args$labels=FALSE
+	}
+}
+if (args$labelstitle==''){
+	args$labelstitle="Log ID"
+}
+
+#plot_user_stretch_hist(data_ready_to_plot,ylabel="Stretch Counts: Detail of",bw=args$grey,labelnames=args$labels,labelstitle=args$labelstitle)
+#pause_output(options_vector)
+#plot_user_stretch_hist_large_scale(data_ready_to_plot,ylabel="Stretch Counts: Overview.",bw=args$grey,labelnames=args$labels,labelstitle=args$labelstitle) +aes(ymin=0)
+#pause_output(options_vector)
+plot_user_stretch_density(data_ready_to_plot,ylabel="Stretch Density: Truncated 0-100",bw=args$grey,labelnames=args$labels,labelstitle=args$labelstitle) 
+pause_output(options_vector)
+#plot_user_stretch_density_large_scale(data_ready_to_plot,ylabel="Stretch Count: Truncated 100-1000",bw=args$grey,labelnames=args$labels,labelstitle=args$labelstitle)
+#pause_output(options_vector)
+
+
+###################END BLOCK#####################
+
+
+#############X11 OUTPUT MANAGEMENT###############
+#################MODIFY IF NEEDED################
+pause_output(options_vector)
+###################END BLOCK#####################
+
+
