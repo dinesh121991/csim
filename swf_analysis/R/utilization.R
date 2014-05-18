@@ -22,7 +22,7 @@ utilization <- function( data,utilization_start=0 )
 
 	# link events with cores number (+/-)
 	startU <- cbind(start, data$proc_alloc)
-	endU <- cbind(stop, -data$proc_alloc) 
+	endU <- cbind(stop, -data$proc_alloc)
 
 	# make one big dataframe
 	U  <- rbind(startU, endU)
@@ -39,7 +39,7 @@ utilization <- function( data,utilization_start=0 )
 	U <- as.data.frame(U)
 
 	# return the dataframe
-	return(U)  
+	return(U)
 
 
 }
@@ -51,7 +51,7 @@ graph_utilization <- function(swf, utilization_start=0){
 	print(table)
 	pp <- ggplot() +
 	geom_step(data=table, aes(x=timestamp, y = cores_used)) +
-	theme_bw() 
+	theme_bw()
 
 	return(pp)
 }

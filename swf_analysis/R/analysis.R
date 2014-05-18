@@ -15,14 +15,14 @@ date_to_timestamp <- function(date, zone="Europe/Paris"){
 }
 
 timestamp_to_date <- function(timestamp){
-	return(as.POSIXct(timestamp, origin="1970-01-01 01:00.00", tz="Europe/Paris")) 
+	return(as.POSIXct(timestamp, origin="1970-01-01 01:00.00", tz="Europe/Paris"))
 }
 
 
 
 graph_usage <- function(swf, utilization_start=0){
 	verb('entering graph_usage')
-	
+
 	plot_util <- graph_utilization(swf, utilization_start)
 
 	plot_queue <- graph_queue_size(swf)
@@ -37,5 +37,61 @@ graph_usage <- function(swf, utilization_start=0){
 	grid.arrange(plot_util, plot_queue, plot_arrivals,  plot_ecdf_wait, ncol=2)
 
 }
+
+graph_walltime_vs_runtime_marginal_distributions_compared <- function(swf, utilization_start=0,by=10000){
+  table1<- data.frame( value=as.numeric(swf$time_req),type= "walltime")
+  table2<- data.frame( value=as.numeric(swf$run_time),type= "runtime")
+  table<- rbind(table1,table2)
+  pp<-ggplot(data=rbind(table1,table2), aes(x=value)) +geom_histogram(aes(fill=type), position="dodge",breaks=seq(0,100000, by=by))+
+  theme_bw()+
+  ggtitle("Walltime and Runtime Marginal Histograms")
+  return(pp)
+}
+
+
+graph_walltime_vs_runtime_expzoom_ratio_histogram <- function(swf, utilization_start=0,by=0.02){
+  swf2=swf[which(swf$run_time-swf$time_req<200),]
+  swf2=swf[which(swf$time_req>=0),]
+  tableRatio <- data.frame(value=(1-exp(-10*swf2$run_time/swf2$time_req)))
+  pp<-ggplot(data=tableRatio ,aes(x=value)) +
+  geom_histogram(breaks=seq(0,1, by=by)) +
+  theme_bw()+
+  ggtitle("Histogram of (1- exp(-10*Runtime/Walltime))")
+  return(pp)
+}
+
+
+graph_walltime_vs_runtime_ratio_histogram <- function(swf, utilization_start=0,by=0.02){
+  tableRatio <- data.frame(value=swf$run_time/swf$time_req)
+  pp<-ggplot(data=tableRatio ,aes(x=value)) +
+  geom_histogram(breaks=seq(0,1, by=by)) +
+  theme_bw()+
+  ggtitle("Histogram of the Runtime/Walltime ratio")
+  return(pp)
+}
+
+graph_walltime_vs_runtime_heatmap <- function(swf, utilization_start=0,binwidth){
+  swf2=swf[which(swf$run_time-swf$time_req<200),]
+  pp<-ggplot(swf2,aes(x=time_req,y=run_time) ) +
+  stat_binhex(binwidth = binwidth ) +
+  theme_bw() +
+  ggtitle("Heatmap of the Runtime vs Walltime")
+  return(pp)
+}
+
+
+graph_walltime_vs_runtime_heatmap_logscale <- function(swf, utilization_start=0,binwidth){
+  swf2=swf[which(swf$run_time-swf$time_req<200),]
+  swf2=swf[which(swf$time_req>=0),]
+  swf2$log_walltime=log(1+swf2$time_req)
+  swf2$log_runtime=log(1+swf2$run_time)
+  #summary(swf2)
+  pp<-ggplot(swf2,aes(x=log_walltime,y=log_runtime) ) +
+  stat_binhex(binwidth = binwidth ) +
+  theme_bw() +
+  ggtitle("Heatmap of the Runtime vs Walltime (logscale)")
+  return(pp)
+}
+
 
 verb('sourced analysis.R')
