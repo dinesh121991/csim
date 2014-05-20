@@ -48,6 +48,17 @@ graph_walltime_vs_runtime_marginal_distributions_compared <- function(swf, utili
   return(pp)
 }
 
+graph_walltime_vs_runtime_ratio_histogram <- function(swf, utilization_start=0,by=0.02,runtime_low_treshold=0,runtime_high_treshold=100000){
+  swf2=swf[which(swf$run_time>=runtime_low_treshold),]
+  swf2=swf2[which(swf2$time_req<=runtime_high_treshold),]
+  tableRatio <- data.frame(value=swf2$run_time/swf2$time_req)
+  pp<-ggplot(data=tableRatio ,aes(x=value)) +
+  geom_histogram(breaks=seq(0,1, by=by)) +
+  theme_bw()+
+  ggtitle("Histogram of the Runtime/Walltime ratio")
+  return(pp)
+}
+
 
 graph_walltime_vs_runtime_expzoom_ratio_histogram <- function(swf, utilization_start=0,by=0.02){
   swf2=swf[which(swf$run_time-swf$time_req<200),]
@@ -60,15 +71,6 @@ graph_walltime_vs_runtime_expzoom_ratio_histogram <- function(swf, utilization_s
   return(pp)
 }
 
-
-graph_walltime_vs_runtime_ratio_histogram <- function(swf, utilization_start=0,by=0.02){
-  tableRatio <- data.frame(value=swf$run_time/swf$time_req)
-  pp<-ggplot(data=tableRatio ,aes(x=value)) +
-  geom_histogram(breaks=seq(0,1, by=by)) +
-  theme_bw()+
-  ggtitle("Histogram of the Runtime/Walltime ratio")
-  return(pp)
-}
 
 graph_walltime_vs_runtime_heatmap <- function(swf, utilization_start=0,binwidth){
   swf2=swf[which(swf$run_time-swf$time_req<200),]
