@@ -76,22 +76,40 @@ graph_walltime_vs_runtime_heatmap <- function(swf, utilization_start=0,binwidth)
   swf2=swf[which(swf$run_time-swf$time_req<200),]
   pp<-ggplot(swf2,aes(x=time_req,y=run_time) ) +
   stat_binhex(binwidth = binwidth ) +
+  #scale_x_continuous(limits=xlimits) +
+  #scale_y_continuous(limits=ylimits) +
   theme_bw() +
   ggtitle("Heatmap of the Runtime vs Walltime")
   return(pp)
 }
 
 
-graph_walltime_vs_runtime_heatmap_logscale <- function(swf, utilization_start=0,binwidth){
-  swf2=swf[which(swf$run_time-swf$time_req<200),]
+graph_cores_vs_runtime_heatmap <- function(swf, utilization_start=0,binwidth,xlimits,ylimits){
   swf2=swf[which(swf$time_req>=0),]
-  swf2$log_walltime=log(1+swf2$time_req)
-  swf2$log_runtime=log(1+swf2$run_time)
-  #summary(swf2)
-  pp<-ggplot(swf2,aes(x=log_walltime,y=log_runtime) ) +
+  swf2=swf2[which(swf$run_time-swf$time_req<=0),]
+  pp<-ggplot(swf2,aes(x=proc_req,y=run_time) ) +
   stat_binhex(binwidth = binwidth ) +
+  scale_x_continuous(limits=xlimits) +
+  scale_y_continuous(limits=ylimits) +
   theme_bw() +
-  ggtitle("Heatmap of the Runtime vs Walltime (logscale)")
+  ggtitle("Heatmap of the Cores vs Runtime")
+  return(pp)
+}
+
+
+
+graph_walltime_vs_runtime_heatmap_log10scale <- function(swf, utilization_start=0,binwidth,xlimits,ylimits){
+  swf2=swf[which(swf$run_time-swf$time_req<200),]
+  swf2=swf2[which(swf2$time_req>=0),]
+  swf2$log10_walltime=log10(1+swf2$time_req)
+  swf2$log10_runtime=log10(1+swf2$run_time)
+  #summary(swf2)
+  pp<-ggplot(swf2,aes(x=log10_walltime,y=log10_runtime) ) +
+  stat_binhex(binwidth = binwidth ) +
+  scale_x_continuous(limits=xlimits) +
+  scale_y_continuous(limits=ylimits) +
+  theme_bw() +
+  ggtitle("Heatmap of the Runtime vs Walltime (log10scale)")
   return(pp)
 }
 
